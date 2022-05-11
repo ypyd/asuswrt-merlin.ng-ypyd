@@ -1,0 +1,279 @@
+--- ./release/src/router/www/Advanced_WAN_Content.asp.000	2022-05-03 19:03:52.650319496 +0800
++++ ./release/src/router/www/Advanced_WAN_Content.asp	2022-05-03 19:44:28.363197131 +0800
+@@ -138,6 +138,10 @@
+ 		document.form.wan_pppoe_passwd.value = pppoe_password;
+ 	}
+ 
++        if(document.form.wan_auth_x.value == "8021x-ttls"){
++                document.form.wan_8021x_anonymous.value = decodeURIComponent('<% nvram_char_to_ascii("", "wan_8021x_anonymous"); %>');
++        }
++
+ 	change_nat(<% nvram_get("wan_nat_x"); %>);
+ 
+ 	if(dnspriv_support){
+@@ -830,6 +834,9 @@
+ 		inputCtrl(document.form.wan_clientid, 0);
+ 		document.form.wan_clientid_type.disabled = true;
+ 		
++                inputCtrl(document.form.wan_8021x_anonymous, 0);
++                inputCtrl(document.form.wan_8021x_innerauth, 0);
++
+ 		inputCtrl(document.form.wan_auth_x, 0);
+ 		inputCtrl(document.form.wan_pppoe_username, 1);
+ 		inputCtrl(document.form.wan_pppoe_passwd, 1);
+@@ -867,6 +874,9 @@
+ 		inputCtrl(document.form.wan_clientid, 0);
+ 		document.form.wan_clientid_type.disabled = true;
+ 		
++                inputCtrl(document.form.wan_8021x_anonymous, 0);
++                inputCtrl(document.form.wan_8021x_innerauth, 0);
++		
+ 		inputCtrl(document.form.wan_auth_x, 0);
+ 		inputCtrl(document.form.wan_pppoe_username, 1);
+ 		inputCtrl(document.form.wan_pppoe_passwd, 1);
+@@ -904,6 +914,9 @@
+ 		inputCtrl(document.form.wan_clientid, 0);
+ 		document.form.wan_clientid_type.disabled = true;
+ 		
++                inputCtrl(document.form.wan_8021x_anonymous, 0);
++                inputCtrl(document.form.wan_8021x_innerauth, 0);
++		
+ 		inputCtrl(document.form.wan_auth_x, 0);
+ 		inputCtrl(document.form.wan_pppoe_username, 1);
+ 		inputCtrl(document.form.wan_pppoe_passwd, 1);
+@@ -941,6 +954,9 @@
+ 		inputCtrl(document.form.wan_clientid, 0);
+ 		document.form.wan_clientid_type.disabled = true;
+ 		
++                inputCtrl(document.form.wan_8021x_anonymous, (document.form.wan_auth_x.value == "8021x-ttls"));
++                inputCtrl(document.form.wan_8021x_innerauth, (document.form.wan_auth_x.value == "8021x-ttls"));
++		
+ 		inputCtrl(document.form.wan_auth_x, 1);
+ 		inputCtrl(document.form.wan_pppoe_username, (document.form.wan_auth_x.value != ""));
+ 		inputCtrl(document.form.wan_pppoe_passwd, (document.form.wan_auth_x.value != ""));
+@@ -992,6 +1008,9 @@
+ 		inputCtrl(document.form.wan_dnsenable_x[1], 1);
+ 		showhide("wan_DHCP_opt",0);
+ 		
++                inputCtrl(document.form.wan_8021x_anonymous, 0);
++                inputCtrl(document.form.wan_8021x_innerauth, 0);
++		
+ 		inputCtrl(document.form.wan_auth_x, 0);
+ 		inputCtrl(document.form.wan_pppoe_username, 0);
+ 		inputCtrl(document.form.wan_pppoe_passwd, 0);
+@@ -1029,6 +1048,9 @@
+ 		document.form.wan_clientid_type.disabled = false;
+ 		showDiableDHCPclientID(document.form.tmp_dhcp_clientid_type);
+ 		
++                inputCtrl(document.form.wan_8021x_anonymous, (document.form.wan_auth_x.value == "8021x-ttls"));
++                inputCtrl(document.form.wan_8021x_innerauth, (document.form.wan_auth_x.value == "8021x-ttls"));
++		
+ 		inputCtrl(document.form.wan_auth_x, 1);	
+ 		inputCtrl(document.form.wan_pppoe_username, (document.form.wan_auth_x.value != ""));
+ 		inputCtrl(document.form.wan_pppoe_passwd, (document.form.wan_auth_x.value != ""));
+@@ -2044,6 +2066,7 @@
+ 							    <select class="input_option" name="wan_auth_x" onChange="change_wan_type(document.form.wan_proto.value);">
+ 							    <option value="" <% nvram_match("wan_auth_x", "", "selected"); %>><#wl_securitylevel_0#></option>
+ 							    <option value="8021x-md5" <% nvram_match("wan_auth_x", "8021x-md5", "selected"); %>>802.1x</option>
++							    <option value="8021x-ttls" <% nvram_match("wan_auth_x", "8021x-ttls", "selected"); %>>802.1x_ttls</option>
+ 							    <option value="telenet" <% nvram_match("wan_auth_x", "telenet", "selected"); %>>Кабinet</option>
+ 							    </select></td>
+ 							</tr>
+@@ -2058,6 +2081,15 @@
+ 						<div style="margin-top:1px;"><input type="checkbox" name="show_pass_1" onclick="pass_checked(document.form.wan_pppoe_passwd);"><#QIS_show_pass#></div>
+ 					</td>
+ 				</tr>
++                <tr>
++                <th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(7,41);"><#WAN8021X_AnonymousIdentity_itemname#></a></th>
++                <td><input type="text" maxlength="64" class="input_32_table" name="wan_8021x_anonymous" value="" autocomplete="off" onkeypress="return validator.isString(this, event)" autocorrect="off" autocapitalize="off"></td>
++                </tr>
++                <tr>
++                <th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(7,42);"><#WAN8021X_InnerAuthentication_itemname#></a></th>
++                <td><select class="input_option" name="wan_8021x_innerauth">
++                  <option value="PAP" <% nvram_match("wan_8021x_innerauth", "PAP", "selected"); %>>PAP</option>
++                </tr>
+ 				<tr style="display:none">
+ 					<th><a class="hintstyle" href="javascript:void(0);" onClick="openHint(7,6);"><#WANPPPAuthText#></a></th>
+ 					<td align="left">
+--- ./release/src/router/www/EN.dict.000	2022-05-03 19:54:22.876314157 +0800
++++ ./release/src/router/www/EN.dict	2022-05-03 19:55:31.358790912 +0800
+@@ -4207,3 +4207,7 @@
+ HTTPS_Protocol_Desc2=The connection between your browser and the ASUS router setting page (router.asus.com) remains secure despite this warning message.
+ Do_Not_Show_Message_Again=Do not show this message again
+ HTTP_Protocol_Desc=HTTP is a relatively less secure web access protocol. Still want to access setting page with HTTP protocol?
++WAN8021X_AnonymousIdentity_itemname=Anonymous Identity
++WAN8021X_AnonymousIdentity_itemdesc=The anonymous identity is used in EAP so that the authenticator can choose the correct authentication server to process the credentials.
++WAN8021X_InnerAuthentication_itemname=Inner Authentication
++WAN8021X_InnerAuthentication_itemdesc=The available Phase 2 Authentication methods are PAP, CHAP, MS-CHAP, MS-CHAPv2, etc.
+--- ./release/src/router/www/help_content.js.000	2022-05-03 19:41:01.119732544 +0800
++++ ./release/src/router/www/help_content.js	2022-05-03 19:43:39.532678551 +0800
+@@ -150,7 +150,9 @@
+ 							 "The IP address of the nameserver.",
+ 							 "TLS Port  (defaults to 853 if left empty).",
+ 							 "Authentication domain name checked against the server certificate.",
+-							 "(Optional) Base64 hash value of the sha256 fingerprint of the public key.");	// 40
++							 "(Optional) Base64 hash value of the sha256 fingerprint of the public key.",	// 40
++							 "<#WAN8021X_AnonymousIdentity_itemdesc#>",
++							 "<#WAN8021X_InnerAuthentication_itemdesc#>");
+ 
+ //Firewall
+ helpcontent[8] = new Array("",
+--- ./release/src/router/shared/defaults.c.000	2022-05-03 19:45:41.794808456 +0800
++++ ./release/src/router/shared/defaults.c	2022-05-03 19:53:41.922805571 +0800
+@@ -1871,6 +1871,8 @@
+ 
+ 	/* Auth parameters */
+ 	{ "wan_auth_x", "", CKN_STR32, CKN_TYPE_DEFAULT, CKN_ACC_LEVEL_DEFAULT, CKN_ENC_DEFAULT, 0 },	/* WAN authentication type */
++	{ "wan_8021x_anonymous", "", CKN_STR64, CKN_TYPE_DEFAULT, CKN_ACC_LEVEL_DEFAULT, CKN_ENC_DEFAULT, 0 },	/* WAN authentication 802.1x EAP_TTLS Anonymous Identity */
++	{ "wan_8021x_innerauth", "PAP", CKN_STR8, CKN_TYPE_DEFAULT, CKN_ACC_LEVEL_DEFAULT, CKN_ENC_DEFAULT, 0 },	/* WAN authentication 802.1x EAP_TTLS Inner Authentication */
+ 
+ 	/* PPPoE parameters */
+ 	{ "wan_pppoe_username", "", CKN_STR64, CKN_TYPE_DEFAULT, CKN_ACC_LEVEL_DEFAULT, CKN_ENC_DEFAULT, 0 },	/* PPP username */
+--- ./release/src/router/rc/auth.c.000	2022-05-03 19:56:06.308034767 +0800
++++ ./release/src/router/rc/auth.c	2022-05-03 20:30:53.314454905 +0800
+@@ -64,6 +64,8 @@
+ 		perror(options);
+ 		return -1;
+ 	}
++        if (nvram_match(strcat_r(prefix, "auth_x", tmp), "8021x-md5"))
++        {
+ 	fprintf(fp,
+ 		"ctrl_interface=%s\n"
+ 		"ap_scan=0\n"
+@@ -77,6 +79,30 @@
+ 		control,
+ 		nvram_safe_get(strcat_r(prefix, "pppoe_username", tmp)),
+ 		nvram_safe_get(strcat_r(prefix, "pppoe_passwd", tmp)));
++        }
++        else
++          if (nvram_match(strcat_r(prefix, "auth_x", tmp), "8021x-ttls")) {
++        fprintf(fp,
++                "ctrl_interface=/var/run/wpa_supplicant\n"
++                "ctrl_interface_group=0\n"
++                "eapol_version=2\n"
++                "ap_scan=0\n"
++                "network={\n"
++                "        key_mgmt=IEEE8021X\n"
++                "        eap=TTLS\n"
++                "        identity=\"%s\"\n"
++                "        anonymous_identity=\"%s\"\n"
++                "        password=\"%s\"\n"
++                "        phase1=\"auth=TTLS\"\n"
++                "        phase2=\"auth=%s password=%s\"\n"
++                "        eapol_flags=0\n"
++                "}\n",
++                nvram_safe_get(strcat_r(prefix, "pppoe_username", tmp)),
++                nvram_safe_get(strcat_r(prefix, "8021x_anonymous", tmp)),
++                nvram_safe_get(strcat_r(prefix, "pppoe_passwd", tmp)),
++                nvram_safe_get(strcat_r(prefix, "8021x_innerauth", tmp)),
++                nvram_safe_get(strcat_r(prefix, "pppoe_passwd", tmp)));
++        }
+ 	fclose(fp);
+ 
+ 	/* Start supplicant & monitor */
+@@ -112,7 +138,7 @@
+ 		return EINVAL;
+ 	snprintf(prefix, sizeof(prefix), "wan%d_", unit);
+ 
+-	if (!nvram_match(strcat_r(prefix, "auth_x", tmp), "8021x-md5"))
++	if (!nvram_match(strcat_r(prefix, "auth_x", tmp), "8021x-md5") && !nvram_match(strcat_r(prefix, "auth_x", tmp), "8021x-ttls"))
+ 		return 0;
+ 
+ 	if (strncmp(argv[2], "CONNECTED", sizeof("CONNECTED")) == 0)
+@@ -213,7 +239,7 @@
+ 
+ 	wan_auth = nvram_safe_get(strcat_r(prefix, "auth_x", tmp));
+ #ifdef RTCONFIG_EAPOL
+-	if (strcmp(wan_auth, "8021x-md5") == 0 && !wan_up)
++	if ((strcmp(wan_auth, "8021x-md5") == 0 || strcmp(wan_auth, "8021x-ttls") == 0) && !wan_up)
+ 		ret = start_wpa_supplicant(unit, 0);
+ #endif
+ #ifdef RTCONFIG_TELENET
+@@ -268,7 +294,7 @@
+ 
+ 	wan_auth = nvram_safe_get(strcat_r(prefix, "auth_x", tmp));
+ #ifdef RTCONFIG_EAPOL
+-	if (strcmp(wan_auth, "8021x-md5") == 0)
++	if (strcmp(wan_auth, "8021x-md5") == 0 || strcmp(wan_auth, "8021x-ttls") == 0)
+ 		ret = start_wpa_supplicant(unit, 1);
+ #endif
+ #ifdef RTCONFIG_TELENET
+--- ./release/src/router/Makefile.000	2022-05-02 20:41:58.556532628 +0800
++++ ./release/src/router/Makefile	2022-05-05 19:12:48.445128975 +0800
+@@ -4475,15 +4475,16 @@
+ 	install -D bpalogin/bpalogin $(INSTALLDIR)/bpalogin/usr/sbin/bpalogin
+ 	$(STRIP) $(INSTALLDIR)/bpalogin/usr/sbin/bpalogin
+ 
+-wpa_supplicant:
+-	$(MAKE) -C $@/wpa_supplicant EXTRACFLAGS="-Os $(EXTRACFLAGS)"
++wpa_supplicant: openssl-1.0
++	$(MAKE) -C $@/wpa_supplicant EXTRACFLAGS="-Os -I$(TOP)/openssl-1.0/include -L$(TOP)/openssl-1.0 $(EXTRACFLAGS)" \
++	LDFLAGS="-L$(TOP)/openssl-1.0"
+ 
+-wpa_supplicant-install: wpa_supplicant
++wpa_supplicant-install: wpa_supplicant openssl-1.0-install
+ 	install -D wpa_supplicant/wpa_supplicant/wpa_supplicant $(INSTALLDIR)/wpa_supplicant/usr/sbin/wpa_supplicant
+ 	install -D wpa_supplicant/wpa_supplicant/wpa_cli $(INSTALLDIR)/wpa_supplicant/usr/sbin/wpa_cli
+ 	$(STRIP) $(INSTALLDIR)/wpa_supplicant/usr/sbin/*
+ 
+-wpa_supplicant-clean:
++wpa_supplicant-clean: openssl-1.0-clean
+ 	-@$(MAKE) -C wpa_supplicant/wpa_supplicant clean
+ 
+ tr069: shared nvramnvram$(BCMEX)$(EX7) $(if $(RTCONFIG_HND_ROUTER), wlcsm)
+@@ -4993,10 +4994,10 @@
+ wtfast-configure:
+ 	@true
+ 
+-wtfast:
++wtfast: openssl-1.0
+ 	@true
+ 
+-wtfast-install:
++wtfast-install: openssl-1.0-install
+ ifeq ($(RTCONFIG_QCA),y)
+ 	$(info FIXME wtfast)
+ else ifeq ($(HND_ROUTER_AX),y)
+@@ -5006,15 +5007,15 @@
+ 	install -D wtfast/wtfslhd/prebuilt$(BCMEX)$(EX7)/wtfslhd $(INSTALLDIR)/wtfast/usr/sbin/wtfslhd
+ 	$(STRIP) $(INSTALLDIR)/wtfast/usr/sbin/wtfslhd
+ endif
+-ifeq ($(RTCONFIG_OPENSSL11),y)
+-	install -d $(INSTALLDIR)/wtfast/usr/lib
+-ifeq ($(HND_ROUTER),y)
+-	cd $(INSTALLDIR)/wtfast/usr/lib && ln -sf libcrypto.so.1.1 libcrypto.so.1.0.0
+-else
+-	cd $(INSTALLDIR)/wtfast/usr/lib && ln -sf ../../lib/libpthread.so.0 libcrypto.so.1.0.0
+-endif
+-	cd $(INSTALLDIR)/wtfast/usr/lib && ln -sf libssl.so.1.1 libssl.so.1.0.0
+-endif
++#ifeq ($(RTCONFIG_OPENSSL11),y)
++#	install -d $(INSTALLDIR)/wtfast/usr/lib
++#ifeq ($(HND_ROUTER),y)
++#	cd $(INSTALLDIR)/wtfast/usr/lib && ln -sf libcrypto.so.1.1 libcrypto.so.1.0.0
++#else
++#	cd $(INSTALLDIR)/wtfast/usr/lib && ln -sf ../../lib/libpthread.so.0 libcrypto.so.1.0.0
++#endif
++#	cd $(INSTALLDIR)/wtfast/usr/lib && ln -sf libssl.so.1.1 libssl.so.1.0.0
++#endif
+ 
+ # Media libraries
+ 
+--- ./release/src/router/wpa_supplicant/wpa_supplicant/.config.000	2022-05-02 19:30:24.328530767 +0800
++++ ./release/src/router/wpa_supplicant/wpa_supplicant/.config	2022-05-02 19:31:29.839483470 +0800
+@@ -3,6 +3,9 @@
+ 
+ CONFIG_IEEE8021X_EAPOL=y
+ CONFIG_EAP_MD5=y
++CONFIG_EAP_PEAP=y
++CONFIG_EAP_TLS=y
++CONFIG_EAP_TTLS=y
+ CONFIG_NO_WPA=y
+ CONFIG_NO_WPA2=y
+ CONFIG_NO_WPA_PASSPHRASE=y
+@@ -15,3 +18,5 @@
+ CONFIG_NO_SCAN_PROCESSING=y
+ CONFIG_NO_CONFIG_WRITE=y
+ CONFIG_NO_CONFIG_BLOBS=y
++CONFIG_TLS=openssl
++CONFIG_EAP_MSCHAPV2=y
